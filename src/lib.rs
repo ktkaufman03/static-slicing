@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 // Disable Clippy's let_unit_value warning because if we take its suggestion
 // we just get a different warning.
 #![allow(clippy::let_unit_value)]
@@ -50,8 +51,10 @@
 //! // error! we can't get the item at index 5, because there are only 5 items
 //! let value = arr[StaticIndex::<5>];
 //! ```
-use core::ops::{Index, IndexMut};
-use std::marker::PhantomData;
+use core::{
+    marker::PhantomData, 
+    ops::{Index, IndexMut},
+};
 
 /// Internal helper trait for static indexing.
 ///
