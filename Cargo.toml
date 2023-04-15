@@ -7,6 +7,17 @@ edition = "2021"
 
 [dependencies]
 
+[dev-dependencies]
+criterion = { version = "0.4", features = ["html_reports"] }
+
+[[bench]]
+name = "static_index_benchmark"
+harness = false
+
+[[bench]]
+name = "static_range_index_benchmark"
+harness = false
+
 [features]
 default = ["std"]
 std = []
