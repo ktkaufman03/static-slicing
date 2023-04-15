@@ -5,10 +5,17 @@
 
 //! Provides utilities for emulating statically-checked array slicing and copying.
 //!
-//! The [`StaticRangeIndex`] type can be used as an index into **fixed-size arrays** to get a fixed-size slice,
-//! or "`n`-slice" where `n` is a constant.
-//! The [`FixedSizeCopy`] trait provides a `copy_from` function that can be used for copies between statically-sized arrays
-//! of types implementing [`Copy`].
+//! The [`StaticRangeIndex`] type can be used as an index into fixed-size arrays
+//! to get or set a fixed-size slice. Likewise, the [`StaticIndex`] type can be used 
+//! to get or set the element at a given index.
+//! 
+//! The static index types can be used to index other collections, such as slices and [`Vec`]s,
+//! but only when they are wrapped in a [`SliceWrapper`]. Due to Rust's orphan rule and lack of
+//! specialization support, this seems to be the best we can do - it's apparently impossible to
+//! implement [`Index`] for both `[T; N]` and `[T]`.
+//! 
+//! The [`FixedSizeCopy`] trait provides a `copy_from` function that can be used for copies 
+//! between statically-sized arrays of types implementing [`Copy`].
 //!
 //! # Examples
 //!
@@ -32,9 +39,18 @@
 //! This example demonstrates how to obtain the item at index 2 of a 4-element array.
 //! ```
 //! use static_slicing::StaticIndex;
-//! let mut arr = [3, 5, 7, 9];
+//! let arr = [3, 5, 7, 9];
 //! let value = arr[StaticIndex::<2>];
 //! assert_eq!(value, 7);
+//! ```
+//! 
+//! This example demonstrates how to obtain a 2-element slice of a 4-element [`Vec`] 
+//! starting from index 0.
+//! ```
+//! use static_slicing::{SliceWrapper, StaticRangeIndex};
+//! let x = vec![1, 2, 3];
+//! let x = SliceWrapper::new(x);
+//! assert_eq!(x[StaticRangeIndex::<0, 2>], [1, 2]);
 //! ```
 //!
 //! The following examples demonstrate the compile-time safety guarantees of the static slicing framework.
@@ -51,6 +67,21 @@
 //! // error! we can't get the item at index 5, because there are only 5 items
 //! let value = arr[StaticIndex::<5>];
 //! ```
+//! 
+//! The following examples demonstrate the runtime safety guarantees of the static slicing framework.
+//! Note that when fixed-size arrays are used, there is zero cost at runtime, since all checks are done
+//! at compile time.
+//! 
+//! ```should_panic
+//! use static_slicing::{SliceWrapper, StaticIndex};
+//! let x = SliceWrapper::new(vec![1, 2, 3]);
+//! let _ = x[StaticIndex::<3>];
+//! ```
+//! ```should_panic
+//! use static_slicing::{SliceWrapper, StaticIndex};
+//! let mut x = SliceWrapper::new(vec![1, 2, 3]);
+//! x[StaticIndex::<3>] = 5;
+//! ```
 use core::{
     marker::PhantomData, 
     ops::{Index, IndexMut},
@@ -64,9 +95,7 @@ trait IsValidIndex<const INDEX: usize> {
     const RESULT: ();
 }
 
-/// An index that exists entirely at compile time.
-///
-/// This type can be used as an index into **fixed-size arrays** to get a value.
+/// A single-element index that exists entirely at compile time.
 pub struct StaticIndex<const INDEX: usize>;
 
 impl<const INDEX: usize, const N: usize, T> IsValidIndex<INDEX> for [T; N] {
@@ -106,8 +135,7 @@ trait IsValidIndexRange<const START: usize, const LENGTH: usize> {
 }
 
 /// A range index that exists entirely at compile time.
-///
-/// This type can be used as an index into **fixed-size arrays** to get a fixed-size slice.
+/// Range indexes can be used to obtain fixed-size slices.
 /// For any pair of `(START, LENGTH)`, the range covered is `[START, START+LENGTH)`.
 pub struct StaticRangeIndex<const START: usize, const LENGTH: usize>;
 
