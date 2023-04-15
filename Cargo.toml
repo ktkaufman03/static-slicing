@@ -1,9 +1,9 @@
 [package]
 name = "static-slicing"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Kai Kaufman <ktkaufman+crates@wpi.edu>"]
-rust-version = "1.57"
+rust-version = "1.59"
 description = "Utilities for enhanced slicing and indexing"
 repository = "https://github.com/ktkaufman03/static-slicing"
 license = "BSD-3-Clause"
