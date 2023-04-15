@@ -121,9 +121,9 @@ impl<T, const INDEX: usize, const N: usize> IndexMut<StaticIndex<INDEX>> for [T;
 
 /// Internal helper trait for static range indexing.
 ///
-/// [`IsValidIndexRange::RESULT`] must evaluate to `()` if the range is valid,
+/// [`IsValidRangeIndex::RESULT`] must evaluate to `()` if the range is valid,
 /// or panic otherwise.
-trait IsValidIndexRange<const START: usize, const LENGTH: usize> {
+trait IsValidRangeIndex<const START: usize, const LENGTH: usize> {
     const RESULT: ();
 }
 
@@ -132,7 +132,7 @@ trait IsValidIndexRange<const START: usize, const LENGTH: usize> {
 /// For any pair of `(START, LENGTH)`, the range covered is `[START, START+LENGTH)`.
 pub struct StaticRangeIndex<const START: usize, const LENGTH: usize>;
 
-impl<T, const START: usize, const LENGTH: usize, const N: usize> IsValidIndexRange<START, LENGTH>
+impl<T, const START: usize, const LENGTH: usize, const N: usize> IsValidRangeIndex<START, LENGTH>
     for [T; N]
 {
     const RESULT: () = {
@@ -147,7 +147,7 @@ impl<T, const START: usize, const LENGTH: usize, const N: usize>
     type Output = [T; LENGTH];
 
     fn index(&self, _: StaticRangeIndex<START, LENGTH>) -> &Self::Output {
-        let _ = <[T; N] as IsValidIndexRange<START, LENGTH>>::RESULT;
+        let _ = <[T; N] as IsValidRangeIndex<START, LENGTH>>::RESULT;
 
         // SAFETY: We've verified bounds at compile time.
         unsafe { &*(self.as_ptr().add(START) as *const [T; LENGTH]) }
@@ -158,7 +158,7 @@ impl<T, const START: usize, const LENGTH: usize, const N: usize>
     IndexMut<StaticRangeIndex<START, LENGTH>> for [T; N]
 {
     fn index_mut(&mut self, _: StaticRangeIndex<START, LENGTH>) -> &mut Self::Output {
-        let _ = <[T; N] as IsValidIndexRange<START, LENGTH>>::RESULT;
+        let _ = <[T; N] as IsValidRangeIndex<START, LENGTH>>::RESULT;
 
         // SAFETY: We've verified bounds at compiile time.
         unsafe { &mut *(self.as_mut_ptr().add(START) as *mut [T; LENGTH]) }
