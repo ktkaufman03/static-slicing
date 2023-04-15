@@ -99,11 +99,7 @@ trait IsValidIndex<const INDEX: usize> {
 pub struct StaticIndex<const INDEX: usize>;
 
 impl<const INDEX: usize, const N: usize, T> IsValidIndex<INDEX> for [T; N] {
-    const RESULT: () = {
-        if INDEX >= N {
-            panic!("Index is out of bounds!");
-        }
-    };
+    const RESULT: () = assert!(N > INDEX, "Index is out of bounds!");
 }
 
 impl<const INDEX: usize, const N: usize, T> Index<StaticIndex<INDEX>> for [T; N] {
@@ -143,11 +139,8 @@ impl<const START: usize, const LENGTH: usize, const N: usize, T> IsValidIndexRan
     for [T; N]
 {
     const RESULT: () = {
-        if START >= N {
-            panic!("Starting index is out-of-bounds, please see compile error for more info");
-        } else if START + LENGTH > N {
-            panic!("Ending index is out-of-bounds, please see compile error for more info");
-        }
+        assert!(N > START, "Starting index is out of bounds!");
+        assert!(N - START >= LENGTH, "Ending index is out of bounds! Check your range index's length.");
     };
 }
 
