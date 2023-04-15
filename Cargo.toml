@@ -2,6 +2,13 @@
 name = "static-slicing"
 version = "0.1.0"
 edition = "2021"
+authors = ["Kai Kaufman <ktkaufman+crates@wpi.edu>"]
+rust-version = "1.57"
+description = "Utilities for enhanced slicing and indexing"
+repository = "https://github.com/ktkaufman03/static-slicing"
+license = "BSD-3-Clause"
+keywords = ["slice", "index"]
+categories = ["no-std"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
