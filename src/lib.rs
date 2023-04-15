@@ -98,11 +98,11 @@ trait IsValidIndex<const INDEX: usize> {
 /// A single-element index that exists entirely at compile time.
 pub struct StaticIndex<const INDEX: usize>;
 
-impl<const INDEX: usize, const N: usize, T> IsValidIndex<INDEX> for [T; N] {
+impl<T, const INDEX: usize, const N: usize> IsValidIndex<INDEX> for [T; N] {
     const RESULT: () = assert!(N > INDEX, "Index is out of bounds!");
 }
 
-impl<const INDEX: usize, const N: usize, T> Index<StaticIndex<INDEX>> for [T; N] {
+impl<T, const INDEX: usize, const N: usize> Index<StaticIndex<INDEX>> for [T; N] {
     type Output = T;
 
     fn index(&self, _: StaticIndex<INDEX>) -> &Self::Output {
@@ -113,7 +113,7 @@ impl<const INDEX: usize, const N: usize, T> Index<StaticIndex<INDEX>> for [T; N]
     }
 }
 
-impl<const INDEX: usize, const N: usize, T> IndexMut<StaticIndex<INDEX>> for [T; N] {
+impl<T, const INDEX: usize, const N: usize> IndexMut<StaticIndex<INDEX>> for [T; N] {
     fn index_mut(&mut self, _: StaticIndex<INDEX>) -> &mut Self::Output {
         let _ = <[T; N] as IsValidIndex<INDEX>>::RESULT;
 
@@ -135,7 +135,7 @@ trait IsValidIndexRange<const START: usize, const LENGTH: usize> {
 /// For any pair of `(START, LENGTH)`, the range covered is `[START, START+LENGTH)`.
 pub struct StaticRangeIndex<const START: usize, const LENGTH: usize>;
 
-impl<const START: usize, const LENGTH: usize, const N: usize, T> IsValidIndexRange<START, LENGTH>
+impl<T, const START: usize, const LENGTH: usize, const N: usize> IsValidIndexRange<START, LENGTH>
     for [T; N]
 {
     const RESULT: () = {
@@ -144,7 +144,7 @@ impl<const START: usize, const LENGTH: usize, const N: usize, T> IsValidIndexRan
     };
 }
 
-impl<const START: usize, const LENGTH: usize, const N: usize, T>
+impl<T, const START: usize, const LENGTH: usize, const N: usize>
     Index<StaticRangeIndex<START, LENGTH>> for [T; N]
 {
     type Output = [T; LENGTH];
@@ -157,7 +157,7 @@ impl<const START: usize, const LENGTH: usize, const N: usize, T>
     }
 }
 
-impl<const START: usize, const LENGTH: usize, const N: usize, T>
+impl<T, const START: usize, const LENGTH: usize, const N: usize>
     IndexMut<StaticRangeIndex<START, LENGTH>> for [T; N]
 {
     fn index_mut(&mut self, _: StaticRangeIndex<START, LENGTH>) -> &mut Self::Output {
@@ -213,7 +213,7 @@ impl<'a, I, T> DerefMut for SliceWrapper<'a, I, T> {
     }
 }
 
-impl<const START: usize, const LENGTH: usize, I, S: AsRef<[I]>> Index<StaticRangeIndex<START, LENGTH>> for SliceWrapper<'_, I, S> {
+impl<I, S: AsRef<[I]>, const START: usize, const LENGTH: usize> Index<StaticRangeIndex<START, LENGTH>> for SliceWrapper<'_, I, S> {
     type Output = [I; LENGTH];
 
     fn index(&self, _: StaticRangeIndex<START, LENGTH>) -> &Self::Output {
@@ -227,7 +227,7 @@ impl<const START: usize, const LENGTH: usize, I, S: AsRef<[I]>> Index<StaticRang
     }
 }
 
-impl<const INDEX: usize, I, S: AsRef<[I]>> Index<StaticIndex<INDEX>> for SliceWrapper<'_, I, S> {
+impl<I, S: AsRef<[I]>, const INDEX: usize> Index<StaticIndex<INDEX>> for SliceWrapper<'_, I, S> {
     type Output = I;
 
     fn index(&self, _: StaticIndex<INDEX>) -> &Self::Output {
@@ -235,7 +235,7 @@ impl<const INDEX: usize, I, S: AsRef<[I]>> Index<StaticIndex<INDEX>> for SliceWr
     }
 }
 
-impl<const START: usize, const LENGTH: usize, I, S: AsRef<[I]> + AsMut<[I]>> IndexMut<StaticRangeIndex<START, LENGTH>> for SliceWrapper<'_, I, S> {
+impl<I, S: AsRef<[I]> + AsMut<[I]>, const START: usize, const LENGTH: usize> IndexMut<StaticRangeIndex<START, LENGTH>> for SliceWrapper<'_, I, S> {
     fn index_mut(&mut self, _: StaticRangeIndex<START, LENGTH>) -> &mut Self::Output {
         let inner: &mut [I] = self.0.as_mut();
 
@@ -247,7 +247,7 @@ impl<const START: usize, const LENGTH: usize, I, S: AsRef<[I]> + AsMut<[I]>> Ind
     }
 }
 
-impl<const INDEX: usize, I, S: AsRef<[I]> + AsMut<[I]>> IndexMut<StaticIndex<INDEX>> for SliceWrapper<'_, I, S> {
+impl<I, S: AsRef<[I]> + AsMut<[I]>, const INDEX: usize> IndexMut<StaticIndex<INDEX>> for SliceWrapper<'_, I, S> {
     fn index_mut(&mut self, _: StaticIndex<INDEX>) -> &mut Self::Output {
         self.0.as_mut().index_mut(INDEX)
     }
