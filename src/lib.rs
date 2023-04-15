@@ -84,7 +84,7 @@
 //! ```
 use core::{
     marker::PhantomData, 
-    ops::{Index, IndexMut},
+    ops::{Index, IndexMut, Deref, DerefMut},
 };
 
 /// Internal helper trait for static indexing.
@@ -171,9 +171,13 @@ impl<const START: usize, const LENGTH: usize, const N: usize, T>
 /// Wrapper around slice references to add support for
 /// the static index types.
 /// 
-/// Due to language weirdness, we can't implement Index(Mut)
-/// for both \[T\] and \[T; N\]. As a result, we need this 
+/// Due to language weirdness, we can't implement [`Index`] and [`IndexMut`]
+/// with static indexes for both `[T]` and `[T; N]`. As a result, we need this 
 /// wrapper type.
+/// 
+/// For convenience, [`SliceWrapper`] also implements [`Deref`] and [`DerefMut`].
+/// This allows [`SliceWrapper`] instances to be converted to `&[T]`, in addition to
+/// allowing all the underlying functions of `T` to be used.
 #[repr(transparent)]
 pub struct SliceWrapper<'a, I, T>(
     /// The actual data reference.
@@ -193,6 +197,19 @@ pub struct SliceWrapper<'a, I, T>(
 impl<'a, I, T> SliceWrapper<'a, I, T> where T: AsRef<[I]> {
     pub fn new(data: T) -> Self {
         Self(data, PhantomData, PhantomData)
+    }
+}
+
+impl<'a, I, T> Deref for SliceWrapper<'a, I, T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<'a, I, T> DerefMut for SliceWrapper<'a, I, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -357,6 +374,7 @@ mod tests {
         fn test_wrapped_slice_read_single() {
             let x = SliceWrapper::new(&[1, 2, 3]);
             assert_eq!(x[StaticIndex::<2>], 3);
+            assert_eq!(x.len(), 3);
         }
 
         #[test]
@@ -386,6 +404,7 @@ mod tests {
             let x = vec![1, 2, 3];
             let x = SliceWrapper::new(x);
             assert_eq!(x[StaticRangeIndex::<0, 2>], [1, 2]);
+            assert_eq!(x.len(), 3);
         }
 
         #[test]
