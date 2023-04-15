@@ -70,13 +70,13 @@ I am not a huge fan of throwing `.try_into().unwrap()` at the end of everything,
 To install the current version of `static_slicing`, add the following to the `dependencies` section of your `Cargo.toml` file:
 
 ```toml
-static-slicing = "0.1.0"
+static-slicing = "0.1.1"
 ```
 
 `no_std` support can be enabled by disabling default features:
 
 ```toml
-static-slicing = { version = "0.1.0", default-features = false }
+static-slicing = { version = "0.1.1", default-features = false }
 ```
 
 **Note: This library requires Rust 1.57 or later.**

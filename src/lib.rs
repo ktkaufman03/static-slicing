@@ -3,7 +3,7 @@
 // we just get a different warning.
 #![allow(clippy::let_unit_value)]
 
-//! Provides utilities for emulating statically-checked array slicing and copying.
+//! Provides utilities for emulating statically-checked array slicing and indexing.
 //!
 //! The [`StaticRangeIndex`] type can be used as an index into fixed-size arrays
 //! to get or set a fixed-size slice. Likewise, the [`StaticIndex`] type can be used 

@@ -1,6 +1,6 @@
 [package]
 name = "static-slicing"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Kai Kaufman <ktkaufman+crates@wpi.edu>"]
 rust-version = "1.57"
