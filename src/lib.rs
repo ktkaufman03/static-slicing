@@ -14,9 +14,6 @@
 //! specialization support, this seems to be the best we can do - it's apparently impossible to
 //! implement [`Index`] for both `[T; N]` and `[T]`.
 //! 
-//! The [`FixedSizeCopy`] trait provides a `copy_from` function that can be used for copies 
-//! between statically-sized arrays of types implementing [`Copy`].
-//!
 //! # Examples
 //!
 //! This example demonstrates how to obtain an 8-element slice of an array, starting from index 4.
@@ -253,54 +250,6 @@ impl<I, S: AsRef<[I]> + AsMut<[I]>, const INDEX: usize> IndexMut<StaticIndex<IND
     }
 }
 
-/// Fixed-size collections supporting copies from other fixed-size collections.
-///
-/// # Examples
-///
-/// This example demonstrates how to copy one 4-byte array to another 4-byte array.
-/// ```
-/// use static_slicing::FixedSizeCopy;
-///
-/// let a1 = [0u8, 1u8, 2u8, 3u8];
-/// let mut a2 = [9u8; 4];
-/// a2.copy_from(a1);
-/// assert_eq!(a1, a2);
-/// ```
-///
-/// This example demonstrates the compile-time safety guarantees of [`FixedSizeCopy`].
-/// ```compile_fail
-/// use static_slicing::FixedSizeCopy;
-///
-/// let a1 = [0u8, 1u8, 2u8, 3u8, 4u8];
-/// let mut a2 = [9u8; 4];
-/// // error! a1 has 5 elements but a2 only has room for 4
-/// a2.copy_from(a1);
-/// assert_eq!(a1, a2);
-/// ```
-pub trait FixedSizeCopy<T>
-where
-    T: Copy,
-{
-    fn copy_from(&mut self, input: Self);
-}
-
-impl<T, const N: usize> FixedSizeCopy<T> for [T; N]
-where
-    T: Copy,
-{
-    fn copy_from(&mut self, input: Self) {
-        // SAFETY: Copying between fixed-size arrays of the same length and type `T` is guaranteed to be SAFE,
-        //         in the sense that things won't explode right away if you do it, even if the data isn't really copyable.
-        //
-        //         It is not always well-defined, though. This is why `FixedSizeCopy` imposes an additional `Copy` bound
-        //         on the type `T`. Any type that implements `Copy` can be considered safe to bit-copy around, as opposed to
-        //         types that only implement `Clone` (or don't implement either!)
-        unsafe {
-            core::ptr::copy_nonoverlapping(input.as_ptr(), self.as_mut_ptr(), N);
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -342,15 +291,6 @@ mod tests {
             sub_arr[5] = 4;
             assert_eq!(arr[4], 5);
             assert_eq!(arr[5], 4);
-        }
-    
-        #[test]
-        fn test_fixed_size_copy() {
-            let a1 = [1, 2, 3, 4, 5, 6];
-            let mut a2 = [0; 6];
-    
-            a2.copy_from(a1);
-            assert_eq!(a2, a1);
         }
     
         #[test]
